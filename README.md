@@ -12,7 +12,9 @@ Este projeto utiliza **PHPWord** para manipulação de arquivos `.docx` e oferec
 
 🔹 **Principais Recursos:**
 - Inserção dinâmica de dados (Nome, E-mail, Telefones, Valores, etc.).
-- Suporte a múltiplos formatos (.docx, .pdf).
+- Geração e edição de documentos Word de forma simples e prática.
+- Suporte à exportação de documentos para formato PDF.
+- Personalização flexível para adaptar o conteúdo aos requisitos do usuário.
 
 ---
 
