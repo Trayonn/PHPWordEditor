@@ -36,6 +36,8 @@ elseif($QTD_ITENS > 20000 ){
 
 $templateProcessor = new TemplateProcessor("Contrato_Modelo_TEMPLATE.docx");
 
+
+
 $templateProcessor->setValue('CONTRATANTE', $_POST["CONTRATANTE"]);
 $templateProcessor->setValue('CONTRATADA', $_POST["CONTRATADA"]);
 $templateProcessor->setValue('NOME', $_POST["NOME"]);
@@ -48,28 +50,33 @@ $templateProcessor->setValue('VALOR_CONTRATO', $VALOR_CONTRATO);
 $filePath = 'Contrato_Gerado.docx';
 $templateProcessor->saveAs($filePath);
 
-$filePathPDF = 'Contrato_Gerado.pdf';
+$formato = $_POST['formato'];
 
-$phpWord = IOFactory::load($filePath);
+if ($formato === 'pdf') {
+    $phpWord = IOFactory::load($filePath);
+    $htmlConverter = IOFactory::createWriter($phpWord, 'HTML');
+    ob_start();
 
-$htmlConverter = IOFactory::createWriter($phpWord, 'HTML');
-ob_start();
-$htmlConverter->save('php://output');
-$htmlConteudo = ob_get_clean();
+    $htmlConverter->save('php://output');
+    $htmlConteudo = ob_get_clean();
+    $options = new Options();
+    $options->set('defaultFont', 'Arial');
+    $dompdf = new Dompdf($options);
+    $dompdf->loadHtml($htmlConteudo);
+    $dompdf->setPaper('A4', 'portrait');
+    $dompdf->render();
 
+    $filePathPDF = 'Contrato_Gerado.pdf';
+    file_put_contents($filePathPDF, $dompdf->output());
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="Contrato_Gerado.pdf"');
+    readfile($filePathPDF);
 
-$options = new Options();
-$options->set('defaultFont', 'Arial');
-$dompdf = new Dompdf($options);
-$dompdf->loadHtml($htmlConteudo);
-$dompdf->setPaper('A4', 'portrait');
-$dompdf->render();
-
-file_put_contents($filePathPDF, $dompdf->output());
-
-header('Content-Type: application/pdf');
-header('Content-Disposition: attachment; filename="Contrato_Gerado.pdf"');
-readfile($filePathPDF);
-exit;
+} else {
+    header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    header('Content-Disposition: attachment; filename="Contrato_Gerado.docx"');
+    header('Content-Length: ' . filesize($filePath));
+    readfile($filePath);
+}
 
 ?>
